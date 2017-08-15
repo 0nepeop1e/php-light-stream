@@ -1,7 +1,10 @@
 # php-light-stream
 Very very lightweight stream
 
-## Usage:
+## Note:
+I am very lazy to write comments and documentation, so you have to read the code to see what it does.
+
+### Usage:
 ```php
 <?php
 include 'stream.php';
