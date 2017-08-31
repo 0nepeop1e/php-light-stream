@@ -292,7 +292,7 @@ namespace LightStream {
             if (!is_callable($operator))
                 throw new TypeError('$operator is not callable');
             foreach ($this->iterable as $v)
-                $init = call_user_func($operator, $init, $v);
+                call_user_func_array($operator, [&$init], $v);
             return $init;
         }
 
