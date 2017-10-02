@@ -23,8 +23,7 @@ namespace LightStream {
          * @param mixed $any anything.
          * @return Stream the stream.
          */
-        public static function of($any)
-        {
+        public static function of($any){
             return new self($any);
         }
 
@@ -35,9 +34,8 @@ namespace LightStream {
          * @return Stream the stream.
          * @throws TypeError when any type error.
          */
-        public static function nTimes($nTimes)
-        {
-            if (!is_numeric($nTimes))
+        public static function nTimes($nTimes){
+            if(!is_numeric($nTimes))
                 throw new TypeError('$nTimes is not a number.');
             return new self(self::_nTimes(intval($nTimes)));
         }
@@ -48,8 +46,7 @@ namespace LightStream {
          * for the infinity loop.
          * @return Stream the stream.
          */
-        public static function infinite()
-        {
+        public static function infinite(){
             return new self(self::_infinite());
         }
 
@@ -61,19 +58,30 @@ namespace LightStream {
          * @return Stream the stream.
          * @throws TypeError when any type error.
          */
-        public static function range($from, $to, $step = 1)
-        {
-            if (!is_numeric($from))
+        public static function range($from, $to, $step = 1){
+            if(!is_numeric($from))
                 throw new TypeError('$from is not a number.');
-            if (!is_numeric($to))
+            if(!is_numeric($to))
                 throw new TypeError('$to is not a number.');
-            if (!is_numeric($step))
+            if(!is_numeric($step))
                 throw new TypeError('$step is not a number.');
             $from = self::_num_val($from);
             $to = self::_num_val($to);
             $step = max(1, abs(self::_num_val($step)));
-            if ($to < $from) $step = -$step;
+            if($to < $from) $step = -$step;
             return new self(self::_range($from, $to, $step));
+        }
+
+        /**
+         * @param array ...$params
+         * @return mixed
+         */
+        public static function firstExists(...$params){
+            return self::of($params)->filter(
+                function($v){
+                    return $v !== null;
+                }
+            )->first();
         }
 
         /**
@@ -81,8 +89,7 @@ namespace LightStream {
          * @param mixed $any the value.
          * @return bool true when its iterable.
          */
-        public static function isIterable($any)
-        {
+        public static function isIterable($any){
             return function_exists('is_iterable') ?
                 is_iterable($any) :
                 is_array($any) || $any instanceof Traversable;
@@ -100,21 +107,20 @@ namespace LightStream {
          */
         private function __construct($any)
         {
-            if ($any instanceof Stream) {
+            if($any instanceof Stream){
                 $this->iterable = $any->iterable;
-            } elseif ($any instanceof Iterator) {
+            }elseif($any instanceof Iterator){
                 $this->iterable = $any;
-            } elseif ($any instanceof IteratorAggregate) {
+            }elseif ($any instanceof IteratorAggregate){
                 $this->iterable = $any->getIterator();
-            } elseif (self::isIterable($any)) {
+            }elseif(self::isIterable($any)){
                 $this->iterable = self::_wrap($any);
-            } else {
+            }else{
                 $this->iterable = self::_one($any);
             }
         }
 
         //region Implemented interface functions
-
         /**
          * Return the current element
          * @link http://php.net/manual/en/iterator.current.php
@@ -177,9 +183,8 @@ namespace LightStream {
          * @return Stream
          * @throws TypeError
          */
-        public function map($mapper)
-        {
-            if (!is_callable($mapper))
+        public function map($mapper){
+            if(!is_callable($mapper))
                 throw new TypeError('$mapper is not callable');
             return new self(self::_map($this->iterable, $mapper));
         }
@@ -189,9 +194,8 @@ namespace LightStream {
          * @return Stream
          * @throws TypeError
          */
-        public function filter($predicate)
-        {
-            if (!is_callable($predicate))
+        public function filter($predicate){
+            if(!is_callable($predicate))
                 throw new TypeError('$predicate is not callable');
             return new self(self::_filter($this->iterable, $predicate));
         }
@@ -201,9 +205,8 @@ namespace LightStream {
          * @return Stream
          * @throws TypeError
          */
-        public function skip($amount)
-        {
-            if (!is_numeric($amount))
+        public function skip($amount){
+            if(!is_numeric($amount))
                 throw new TypeError('$amount is not a number.');
             return new self(self::_skip($this->iterable, intval($amount)));
         }
@@ -213,9 +216,8 @@ namespace LightStream {
          * @return Stream
          * @throws TypeError
          */
-        public function limit(int $amount)
-        {
-            if (!is_numeric($amount))
+        public function limit(int $amount){
+            if(!is_numeric($amount))
                 throw new TypeError('$amount is not a number.');
             return new self(self::_limit($this->iterable, intval($amount)));
         }
@@ -223,8 +225,7 @@ namespace LightStream {
         /**
          * @return Stream
          */
-        public function unPair()
-        {
+        public function unPair(){
             return new self(self::_unPair($this->iterable));
         }
 
@@ -233,9 +234,8 @@ namespace LightStream {
          * @return Stream
          * @throws TypeError
          */
-        public function pair($keyProvider)
-        {
-            if (!is_callable($keyProvider))
+        public function pair($keyProvider){
+            if(!is_callable($keyProvider))
                 throw new TypeError('$keyProvider is not callable.');
             return new self(self::_pair($this->iterable, $keyProvider));
         }
@@ -246,9 +246,8 @@ namespace LightStream {
          * @throws TypeError
          * @see Stream::pair()
          */
-        public function group($groupProvider)
-        {
-            if (!is_callable($groupProvider))
+        public function group($groupProvider){
+            if(!is_callable($groupProvider))
                 throw new TypeError('$groupProvider is not callable.');
             return new self($this->pair($groupProvider)->collectWithKeys());
         }
@@ -257,9 +256,8 @@ namespace LightStream {
          * @param iterable[] ...$iterable
          * @return Stream
          */
-        public function concat(...$iterable)
-        {
-            $iterable = Stream::of($iterable)->map(function ($i) {
+        public function concat(...$iterable){
+            $iterable = Stream::of($iterable)->map(function($i){
                 return (new self($i))->iterable;
             });
             return new self(self::_concat($this->iterable, $iterable->collect()));
@@ -268,16 +266,14 @@ namespace LightStream {
         /**
          * @return Stream
          */
-        public function flatten()
-        {
+        public function flatten(){
             return new self(self::_flatten($this->iterable));
         }
 
         /**
          * @return Stream
          */
-        public function flattenToTheEnd()
-        {
+        public function flattenToTheEnd(){
             return new self(self::_flattenToTheEnd($this->iterable));
         }
 
@@ -287,9 +283,8 @@ namespace LightStream {
          * @return mixed
          * @throws TypeError
          */
-        public function reduce($operator, $init)
-        {
-            if (!is_callable($operator))
+        public function reduce($operator, $init){
+            if(!is_callable($operator))
                 throw new TypeError('$operator is not callable');
             foreach ($this->iterable as $v)
                 call_user_func_array($operator, [&$init, $v]);
@@ -300,13 +295,12 @@ namespace LightStream {
          * @param callable $predicate
          * @return bool
          */
-        public function any($predicate = null)
-        {
-            if (is_callable($predicate)) {
+        public function any($predicate = null){
+            if(is_callable($predicate)) {
                 foreach ($this->iterable as $v) {
-                    if (call_user_func($predicate, $v)) return true;
+                    if (call_user_func($predicate, $v)===true) return true;
                 }
-            } else {
+            }else {
                 foreach ($this->iterable as $v) {
                     if ($v) return true;
                 }
@@ -318,13 +312,12 @@ namespace LightStream {
          * @param callable $predicate
          * @return bool
          */
-        public function all($predicate = null)
-        {
-            if (is_callable($predicate)) {
+        public function all($predicate = null){
+            if(is_callable($predicate)) {
                 foreach ($this->iterable as $v) {
-                    if (!call_user_func($predicate, $v)) return false;
+                    if (call_user_func($predicate, $v)!==true) return false;
                 }
-            } else {
+            }else {
                 foreach ($this->iterable as $v) {
                     if (!$v) return false;
                 }
@@ -333,21 +326,40 @@ namespace LightStream {
         }
 
         /**
+         * @return mixed
+         */
+        public function first(){
+            foreach ($this->iterable as $v){
+                return $v;
+            }
+            return null;
+        }
+
+        /**
+         * @return mixed
+         */
+        public function last(){
+            $res = null;
+            foreach ($this->iterable as $v){
+                $res = $v;
+            }
+            return $res;
+        }
+
+        /**
          * @return array
          */
-        public function collect()
-        {
+        public function collect(){
             return iterator_to_array($this, false);
         }
 
         /**
          * @return array
          */
-        public function collectWithKeys()
-        {
+        public function collectWithKeys(){
             $res = [];
-            foreach ($this as $key => $value) {
-                if (!isset($res[$key]))
+            foreach ($this as $key => $value){
+                if(!isset($res[$key]))
                     $res[$key] = [];
                 array_push($res[$key], $value);
             }
@@ -358,10 +370,9 @@ namespace LightStream {
          * @param $any
          * @return float|int
          */
-        private static function _num_val($any)
-        {
+        private static function _num_val($any){
             $val = floatval($any);
-            if ($val - floor($val) == 0 && $val >= PHP_INT_MIN && $val <= PHP_INT_MAX)
+            if($val - floor($val) == 0 && $val >= PHP_INT_MIN && $val <= PHP_INT_MAX)
                 return intval($val);
             return $val;
         }
@@ -372,18 +383,16 @@ namespace LightStream {
          * @param int $n
          * @return Generator
          */
-        private static function _nTimes($n)
-        {
-            for ($i = 0; $i < $n; $i++)
+        private static function _nTimes($n){
+            for($i = 0;$i < $n;$i++)
                 yield $i;
         }
 
         /**
          * @return Generator
          */
-        private static function _infinite()
-        {
-            while (true) yield;
+        private static function _infinite(){
+            while(true) yield;
         }
 
         /**
@@ -392,9 +401,8 @@ namespace LightStream {
          * @param int $s
          * @return Generator
          */
-        private static function _range($f, $t, $s)
-        {
-            for (; ($f <=> $t) * $s < 0; $f += $s)
+        private static function _range($f, $t, $s){
+            for(;($f<=>$t)*$s < 0;$f+=$s)
                 yield $f;
         }
 
@@ -402,8 +410,7 @@ namespace LightStream {
          * @param Iterator $i
          * @return Generator
          */
-        private static function _wrap($i)
-        {
+        private static function _wrap($i){
             yield from $i;
         }
 
@@ -411,8 +418,7 @@ namespace LightStream {
          * @param mixed $v
          * @return Generator
          */
-        private static function _one($v)
-        {
+        private static function _one($v){
             yield 0 => $v;
         }
 
@@ -421,8 +427,7 @@ namespace LightStream {
          * @param callable $c
          * @return Generator
          */
-        private static function _map($i, $c)
-        {
+        private static function _map($i, $c){
             foreach ($i as $k => $v)
                 yield $k => call_user_func($c, $v);
         }
@@ -432,10 +437,9 @@ namespace LightStream {
          * @param callable $c
          * @return Generator
          */
-        private static function _filter($i, $c)
-        {
+        private static function _filter($i, $c){
             foreach ($i as $k => $v)
-                if (call_user_func($c, $v))
+                if (call_user_func($c, $v)===true)
                     yield $k => $v;
         }
 
@@ -444,10 +448,9 @@ namespace LightStream {
          * @param int $n
          * @return Generator
          */
-        private static function _skip($i, $n)
-        {
-            for (; $n; $n--) $i->next();
-            for (; $i->valid(); $i->next())
+        private static function _skip($i, $n){
+            for (;$n;$n--)$i->next();
+            for(;$i->valid();$i->next())
                 yield $i->key() => $i->current();
         }
 
@@ -456,10 +459,9 @@ namespace LightStream {
          * @param int $n
          * @return Generator
          */
-        private static function _limit($i, $n)
-        {
-            foreach ($i as $k => $v) {
-                if (!$n--) break;
+        private static function _limit($i, $n){
+            foreach ($i as $k => $v){
+                if(!$n--)break;
                 yield $k => $v;
             }
         }
@@ -468,10 +470,9 @@ namespace LightStream {
          * @param Iterator $i
          * @return Generator
          */
-        private static function _unPair($i)
-        {
-            foreach ($i as $k => $v)
-                yield (object)['key' => $k, 'value' => $v];
+        private static function _unPair($i){
+            foreach ($i as $k=>$v)
+                yield (object)['key'=>$k, 'value'=>$v];
         }
 
         /**
@@ -479,19 +480,17 @@ namespace LightStream {
          * @param callable $c
          * @return Generator
          */
-        private static function _pair($i, $c)
-        {
+        private static function _pair($i, $c){
             foreach ($i as $v)
                 yield call_user_func($c, $v) => $v;
         }
 
         /**
-         * @param Iterator $i
+         * @param Iterator  $i
          * @param Iterator[] $is
          * @return Generator
          */
-        private static function _concat($i, $is)
-        {
+        private static function _concat($i, $is){
             yield from $i;
             foreach ($is as $i)
                 yield from $i;
@@ -501,10 +500,9 @@ namespace LightStream {
          * @param Iterator $i
          * @return Generator
          */
-        private static function _flatten($i)
-        {
-            foreach ($i as $k => $v) {
-                if (self::isIterable($v)) {
+        private static function _flatten($i){
+            foreach ($i as $k => $v){
+                if(self::isIterable($v)){
                     yield from $v;
                 } else {
                     yield $k => $v;
@@ -516,10 +514,9 @@ namespace LightStream {
          * @param Iterator $i
          * @return Generator
          */
-        private static function _flattenToTheEnd($i)
-        {
-            foreach ($i as $k => $v) {
-                if (self::isIterable($v)) {
+        private static function _flattenToTheEnd($i){
+            foreach ($i as $k => $v){
+                if(self::isIterable($v)){
                     yield from self::_flattenToTheEnd($v);
                 } else {
                     yield $k => $v;
