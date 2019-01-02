@@ -2,7 +2,7 @@
 /**
  * Very very lightweight stream
  */
-namespace LightStream {
+namespace EsLym\LightStream {
 
     use \Iterator;
     use \Generator;

@@ -1,0 +1,21 @@
+{
+  "name": "eslym/php-light-stream",
+  "description": "Very very lightweight stream",
+  "version": "1.0.0",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Eslym",
+      "email": "engshun.lim@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Eslym\\LightStream\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^7.0"
+  }
+}
