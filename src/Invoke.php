@@ -16,7 +16,7 @@ class Invoke
 
     public function __invoke($object)
     {
-        call_user_func_array([$object, $this->name], $this->arguments);
+        return call_user_func_array([$object, $this->name], $this->arguments);
     }
 
     public static function __callStatic($name, $arguments)
