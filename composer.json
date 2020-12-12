@@ -1,7 +1,6 @@
 {
   "name": "eslym/php-light-stream",
   "description": "Very very lightweight stream",
-  "version": "1.0.3",
   "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
@@ -16,6 +15,6 @@
     }
   },
   "require": {
-    "php": "^7.0"
+    "php": ">=7.0"
   }
 }
